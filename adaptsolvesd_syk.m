@@ -6,7 +6,8 @@ kmax = 6;
 numbetas = 1;
 q = 4;
 
-betas = 5.2029*2;
+% betas = 5.2029*2;
+betas = 2^(-3);
 
 % betas = 2.^(linspace(-3,10,numbetas));
 % betas = 2.^(-3:10);

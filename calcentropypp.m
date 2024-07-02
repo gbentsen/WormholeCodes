@@ -1,3 +1,13 @@
+if (~exist('kA','var'))
+    kA = 1;
+end
+if (~exist('kB','var'))
+    kB = 2;
+end
+if (mod(k,kA) ~= 0 || mod(k,kB) ~= 0)
+    error('k must be divisible by kA and kB');
+end
+
 for aa = 1:length(alphas)
     for bb = 1:length(betas)
         
@@ -10,8 +20,8 @@ for aa = 1:length(alphas)
         alpha = alphas(aa);
         beta = betas(bb);
     
-        actionbynalpha0 = calcactionbyn(GnnpAalpha0, GnnpBalpha0, 0.0, beta, n, k);
-        actionbyn = calcactionbyn(GnnpA, GnnpB, alpha, beta, n, k);
+        actionbynalpha0 = calcactionbyn(GnnpAalpha0, GnnpBalpha0, 0.0, beta, n, k, kA, kB);
+        actionbyn = calcactionbyn(GnnpA, GnnpB, alpha, beta, n, k, kA, kB);
         
         data(aa,bb).entropypp = actionbyn - actionbynalpha0;
         

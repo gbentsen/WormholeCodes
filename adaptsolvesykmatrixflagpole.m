@@ -1,4 +1,4 @@
-function data = adaptsolvesykmatrixflagpole(n,q,betas,maxiter,x,targeterror,alphas,k,calcaction)
+function data = adaptsolvesykmatrixflagpole(n,q,betas,maxiter,x,targeterror,alphas,k,calcaction,kA,kB)
     
     for aa = 1:length(alphas)
         for bb = 1:length(betas)
@@ -8,7 +8,7 @@ function data = adaptsolvesykmatrixflagpole(n,q,betas,maxiter,x,targeterror,alph
 
             fprintf('alpha = %f, beta = %f\n',alpha,beta);
     %         if (bb == 1)
-                data(aa,bb) = adaptsolvesykmatrixflagpolesingle(n,q,beta,maxiter,x,targeterror,alpha,k,calcaction);
+                data(aa,bb) = adaptsolvesykmatrixflagpolesingle(n,q,beta,maxiter,x,targeterror,alpha,k,calcaction,kA,kB);
     %         else
     %             oldGnnpA = data(aa,bb-1).GnnpA;        % !!! Feed in the old higher-temp solution
     %             oldGnnpB = data(aa,bb-1).GnnpB;
@@ -19,32 +19,37 @@ function data = adaptsolvesykmatrixflagpole(n,q,betas,maxiter,x,targeterror,alph
     end
 end
 
-function data = adaptsolvesykmatrixflagpolesingle(n,q,beta,maxiter,x,targeterror,alpha,k,calcaction,oldGnnpA,oldGnnpB)
+function data = adaptsolvesykmatrixflagpolesingle(n,q,beta,maxiter,x,targeterror,alpha,k,calcaction,kA,kB,oldGnnpA,oldGnnpB)
+    
+    if (~exist('kA','var'))
+        kA = 1;
+    end
+    if (~exist('kB','var'))
+        kB = 2;
+    end
+    if (mod(k,kA) ~= 0 || mod(k,kB) ~= 0)
+        error('k must be divisible by kA and kB');
+    end
     
     preverr = 1000000.0;
     
     betabynsqr = (beta/n)^2;
     
     % Create deltamatA
-    v = [1 -1];
-    v = [v, zeros(1,k*n-2)];
-    deltamatA = toeplitz(v,[v(1) fliplr(v(2:end))]);
-    deltamatA(1,k*n) = 1;  % antiperiodic boundary conditions in 2\beta
+    deltamatA = gendeltamat(k/kA*n,kA);
     
     % Create deltamatB
-    v = [1 -1];
-    v = [v, zeros(1,n-2)];
-    deltamatB = toeplitz(v,[v(1) fliplr(v(2:end))]);
-    deltamatB(1,n) = 1;  % antiperiodic boundary conditions in \beta
-    deltamatB = blkdiag(deltamatB,deltamatB);
+    deltamatB = gendeltamat(k/kB*n,kB);
 
     
     if (exist('oldGnnpA','var') && exist('oldGnnpB','var'))     % Feed in the old higher-temp solution
         GnnpA = oldGnnpA;
         GnnpB = oldGnnpB;
     else
-        GnnpA = - transpose(inv(deltamatA)) + (1/2*rand(k*n,k*n)-1/4);
-        GnnpB = - transpose(inv(deltamatB)) + (1/2*rand(k*n,k*n)-1/4);
+%         GnnpA = - transpose(inv(deltamatA)) + (1/2*rand(k*n,k*n)-1/4);
+%         GnnpB = - transpose(inv(deltamatB)) + (1/2*rand(k*n,k*n)-1/4);
+        GnnpA = - transpose(inv(deltamatA));
+        GnnpB = - transpose(inv(deltamatB));
 %         GnnpA = rand(k*n,k*n)-1/2;
 %         GnnpB = rand(k*n,k*n)-1/2;
     end

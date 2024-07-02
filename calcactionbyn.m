@@ -1,19 +1,22 @@
-function actionbyn = calcactionbyn(GnnpA, GnnpB, alpha, beta, n, k)
+function actionbyn = calcactionbyn(GnnpA, GnnpB, alpha, beta, n, k, kA, kB)
 
+    if (~exist('kA','var'))
+        kA = 1;
+    end
+    if (~exist('kB','var'))
+        kB = 2;
+    end
+    if (mod(k,kA) ~= 0 || mod(k,kB) ~= 0)
+        error('k must be divisible by kA and kB');
+    end
+    
     betabynsqr = (beta/n)^2;
 
     % Create deltamatA
-    v = [1 -1];
-    v = [v, zeros(1,k*n-2)];
-    deltamatA = toeplitz(v,[v(1) fliplr(v(2:end))]);
-    deltamatA(1,k*n) = 1;  % antiperiodic boundary conditions in 2\beta
-
+    deltamatA = gendeltamat(k/kA*n,kA);
+    
     % Create deltamatB
-    v = [1 -1];
-    v = [v, zeros(1,n-2)];
-    deltamatB = toeplitz(v,[v(1) fliplr(v(2:end))]);
-    deltamatB(1,n) = 1;  % antiperiodic boundary conditions in \beta
-    deltamatB = blkdiag(deltamatB,deltamatB);
+    deltamatB = gendeltamat(k/kB*n,kB);
 
 
     Sigmannp = ( alpha * GnnpA + (1-alpha) * GnnpB ).^3;
